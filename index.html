@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pixel Prodigy Electron</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+</html>
+<script>
+  // Populate environment select dropdown
+  environments.forEach(env => {
+    const option = document.createElement('option');
+    option.value = env.name;
+    option.textContent = env.name;
+    envSelect.appendChild(option);
+  });
+
+  // Function to update palette based on selected environment
+  function updatePalette() {
+    const selectedEnv = environments.find(env => env.name === envSelect.value);
+    paletteDiv.innerHTML = '';
+    selectedEnv.palette.forEach(color => {
+      const swatch = document.createElement('div');
+      swatch.className = 'color-swatch';
+      swatch.style.backgroundColor = color;
+      swatch.addEventListener('click', () => {
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+        swatch.classList.add('selected');
+        ctx.fillStyle = color;
+      });
+      paletteDiv.appendChild(swatch);
+    });
+  }
+
+  // Initial palette setup
+  updatePalette();
+  envSelect.addEventListener('change', updatePalette);
+
+  // Canvas click event to draw pixels
+  canvas.addEventListener('click', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / 8);
+    const y = Math.floor((e.clientY - rect.top) / 8);
+    ctx.fillRect(x * 8, y * 8, 8, 8);
+  });

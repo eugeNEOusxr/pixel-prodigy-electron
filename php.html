@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Pixel Prodigy Prototype</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #222; color: #eee; display: flex; flex-direction: column; align-items: center; padding: 20px;}
+  #envSelect { margin-bottom: 10px; }
+  #palette { margin-bottom: 10px; }
+  .color-swatch {
+    display: inline-block;
+    width: 24px; height: 24px;
+    border: 2px solid #444;
+    margin: 0 4px;
+    cursor: pointer;
+  }
+  .color-swatch.selected {
+    border-color: #fff;
+  }
+  canvas {
+    background: #111;
+    image-rendering: pixelated;
+    cursor: crosshair;
+    border: 1px solid #555;
+  }
+</style>
+</head>
+<body>
+
+<h1>Pixel Prodigy Prototype</h1>
+
+<label for="envSelect">Choose Environment:</label>
+<select id="envSelect"></select>
+
+<div id="palette"></div>
+
+<canvas id="pixelCanvas" width="256" height="256"></canvas>
+
+<script>
+  // Define environments
+  const environments = [
+    {
+      name: "NeonGrid",
+      palette: ["#FF00FF", "#00FFFF", "#FFFFFF", "#000000"]
+    },
+    {
+      name: "EarthTones",
+      palette: ["#A0522D", "#556B2F", "#8B4513", "#DEB887"]
+    },
+    {
+      name: "RetroGame",
+      palette: ["#FF0000", "#00FF00", "#0000FF", "#FFFF00"]
+    }
+  ];
+
+  const envSelect = document.getElementById('envSelect');
+  const paletteDiv = document.getElementById('palette');
+  const canvas = document.getElementById('pixelCanvas');
+  const ctx = canvas.getContext('2d');
+
+  let currentColor = '#FF00FF';
+  let pixelSize = 16;
+  let canvasWidth = canvas.width / pixelSize;
+  let canvasHeight = canvas.height / pixelSize;
+
+  // Fill canvas grid with default color
+  function clearCanvas() {
+    ctx.fillStyle = '#111';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  // Draw the grid lines
+  function drawGrid() {
+    ctx.strokeStyle = '#333';
+    for (let x = 0; x <= canvas.width; x += pixelSize) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, canvas.height);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= canvas.height; y += pixelSize) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(canvas.width, y);
+      ctx.stroke();
+    }
+  }
+
+  // Draw a pixel on the grid
+  function drawPixel(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
+  }
+
+  // Setup palette UI
+  function loadPalette(colors) {
+    paletteDiv.innerHTML = '';
+    colors.forEach(color => {
+      const swatch = document.createElement('div');
+      swatch.className = 'color-swatch';
+      swatch.style.backgroundColor = color;
+      if (color === currentColor) swatch.classList.add('selected');
+      swatch.addEventListener('click', () => {
+        currentColor = color;
+        document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+        swatch.classList.add('selected');
+      });
+      paletteDiv.appendChild(swatch);
+    });
+  }
+
+  // Load environments into select dropdown
+  function loadEnvironments() {
+    environments.forEach((env, idx) => {
+      const option = document.createElement('option');
+      option.value = idx;
+      option.textContent = env.name;
+      envSelect.appendChild(option);
+    });
+    envSelect.selectedIndex = 0;
+    loadPalette(environments[0].palette);
+  }
+
+  // Initialize
+  function init() {
+    clearCanvas();
+    drawGrid();
+    loadEnvironments();
+  }
+
+  canvas.addEventListener('click', e => {
+    const rect = canvas.getBoundingClientRect();
+    const x = Math.floor((e.clientX - rect.left) / pixelSize);
+    const y = Math.floor((e.clientY - rect.top) / pixelSize);
+    drawPixel(x, y, currentColor);
+  });
+
+  envSelect.addEventListener('change', e => {
+    const selectedEnv = environments[e.target.value];
+    loadPalette(selectedEnv.palette);
+  });
+
+  init();
+</script>
+
+</body>
+</html>
